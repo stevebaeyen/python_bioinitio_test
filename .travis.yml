@@ -1,0 +1,21 @@
+sudo: true
+dist: xenial 
+services:
+  - docker
+language: python 
+python:
+  - "3.4"
+
+before_install:
+  - pip3 install cwltool
+  - docker build -t python_bioinitio_test .
+
+script:
+  # Both of these same tests, in Docker
+  # Functional tests
+  - docker run --entrypoint /python_bioinitio_test/.travis/unit-test.sh python_bioinitio_test
+  # Unit tests
+  - docker run --entrypoint /python_bioinitio_test/functional_tests/python_bioinitio_test-test.sh python_bioinitio_test -p python_bioinitio_test -d /python_bioinitio_test/functional_tests/test_data -v
+
+  # CWL definition test
+  - cwltool python_bioinitio_test.cwl --fasta_file functional_tests/test_data/two_sequence.fasta
